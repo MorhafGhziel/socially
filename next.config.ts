@@ -1,8 +1,13 @@
-import { NextConfig } from "next";
+import type { Configuration } from "webpack";
 
-const config: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ["mongoose"],
+    serverActions: true,
+  },
+  webpack: (config: Configuration) => {
+    config.externals = [...(config.externals || []), "mongoose"];
+    return config;
   },
   eslint: {
     // Warning: This allows production builds to successfully complete even if
@@ -10,7 +15,6 @@ const config: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ["localhost"],
     remotePatterns: [
       {
         protocol: "https",
@@ -32,4 +36,4 @@ const config: NextConfig = {
   },
 };
 
-export default config;
+export default nextConfig;
