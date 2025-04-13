@@ -6,7 +6,10 @@ const nextConfig = {
     serverActions: true,
   },
   webpack: (config: Configuration) => {
-    config.externals = [...(config.externals || []), "mongoose"];
+    if (!Array.isArray(config.externals)) {
+      config.externals = [];
+    }
+    config.externals.push({ mongoose: "mongoose" });
     return config;
   },
   eslint: {
