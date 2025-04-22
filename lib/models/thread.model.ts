@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 
 const threadSchema = new mongoose.Schema({
   text: { type: String, required: true },
-  author: { type: String, required: true },
-  community: { type: String, ref: "Community" },
+  author: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
+  community: { type: mongoose.Schema.Types.ObjectId, ref: "Community" },
   createdAt: { type: Date, default: Date.now },
-  parentId: { type: String },
-  children: [{ type: String, ref: "Thread" }],
+  parentId: { type: mongoose.Schema.Types.ObjectId, ref: "Thread" },
+  children: [{ type: mongoose.Schema.Types.ObjectId, ref: "Thread" }],
 });
 
 // Add method to convert to plain object

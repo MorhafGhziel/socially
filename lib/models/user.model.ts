@@ -11,6 +11,15 @@ const userSchema = new mongoose.Schema({
   communities: [{ type: mongoose.Schema.Types.ObjectId, ref: "Community" }],
 });
 
+// Add method to convert to plain object
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  obj.id = obj._id?.toString() || obj.id;
+  delete obj._id;
+  delete obj.__v;
+  return obj;
+};
+
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;
