@@ -4,8 +4,18 @@ import { fetchUser } from "@/lib/actions/user.actions";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Comment from "@/components/forms/Comment";
+import { Metadata } from "next";
 
-export default async function Page({ params }: { params: { id: string } }) {
+type Props = {
+  params: { id: string };
+};
+
+export const metadata: Metadata = {
+  title: "Thread | Socially",
+  description: "View and reply to thread",
+};
+
+async function Page({ params }: Props) {
   if (!params.id) return null;
 
   const user = await currentUser();
@@ -85,3 +95,5 @@ export default async function Page({ params }: { params: { id: string } }) {
     </section>
   );
 }
+
+export default Page;
