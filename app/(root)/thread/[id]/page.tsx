@@ -12,12 +12,15 @@ export const metadata: Metadata = {
 };
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export default async function ThreadPage({ params }: PageProps) {
-  if (!params.id) {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+
+  if (!id) {
     return <div className="text-center mt-10">Thread ID is required</div>;
   }
 
@@ -36,7 +39,7 @@ export default async function ThreadPage({ params }: PageProps) {
   }
 
   try {
-    const thread = await fetchThreadById(params.id);
+    const thread = await fetchThreadById(id);
     if (!thread) {
       return <div className="text-center mt-10">Thread not found</div>;
     }
@@ -74,7 +77,7 @@ export default async function ThreadPage({ params }: PageProps) {
 
         <div className="mt-7">
           <Comment
-            threadId={params.id}
+            threadId={id}
             currentUserImg={userInfo.image}
             currentUserId={user.id}
           />
