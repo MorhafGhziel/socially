@@ -2,6 +2,7 @@
 
 import Thread from "../models/thread.model";
 import User from "../models/user.model";
+import Community from "../models/community.model";
 import { connectToDB } from "../mongoose";
 import { revalidatePath } from "next/cache";
 
@@ -21,62 +22,69 @@ export async function createThread({
   try {
     await connectToDB();
 
-    // Create the thread with string IDs
-    const createdThread = await Thread.create({
+    // Find the user first
+    const user = await User.findOne({ id: author });
+    if (!user) throw new Error("User not found");
+
+    // Create thread
+    const thread = await Thread.create({
       text,
-      author,
+      author: user._id,
       community: communityId,
-      parentId: null,
-      children: [],
+      createdAt: new Date(),
     });
 
-    // Update user's threads array
-    await User.findOneAndUpdate(
-      { id: author },
-      { $push: { threads: createdThread._id.toString() } }
-    );
+    // Update user model
+    await User.findByIdAndUpdate(user._id, {
+      $push: { threads: thread._id },
+    });
 
     revalidatePath(path);
-
-    // Convert to plain object before returning
-    const threadObject = createdThread.toJSON();
-    return threadObject;
   } catch (error: any) {
-    console.error("Error in createThread:", error);
     throw new Error(`Failed to create thread: ${error.message}`);
   }
 }
 
 export async function fetchPosts(pageNumber = 1, pageSize = 20) {
-  connectToDB();
+  try {
+    await connectToDB();
 
-  const skipAmount = (pageNumber - 1) * pageSize;
+    const skipAmount = (pageNumber - 1) * pageSize;
 
-  const postQuery = Thread.find({ parentId: { $in: [null, undefined] } })
-    .sort({ createdAt: "desc" })
-    .skip(skipAmount)
-    .limit(pageSize)
-    .populate({
-      path: "author",
-      model: User,
-      select: "_id id name image",
-    })
-    .populate({
-      path: "children",
-      populate: {
+    // Fetch posts with populated author and community
+    const postsQuery = Thread.find({ parentId: { $in: [null, undefined] } })
+      .sort({ createdAt: "desc" })
+      .skip(skipAmount)
+      .limit(pageSize)
+      .populate({
         path: "author",
         model: User,
-        select: "_id id name parentId image",
-      },
-    });
+        select: "id name image username",
+      })
+      .populate({
+        path: "community",
+        model: Community,
+        select: "id name image",
+      })
+      .populate({
+        path: "children",
+        populate: {
+          path: "author",
+          model: User,
+          select: "id name image",
+        },
+      });
 
-  const totalPostsCount = await Thread.countDocuments({
-    parentId: { $in: [null, undefined] },
-  });
+    const [posts, totalPostsCount] = await Promise.all([
+      postsQuery.exec(),
+      Thread.countDocuments({ parentId: { $in: [null, undefined] } }),
+    ]);
 
-  const posts = await postQuery;
+    const isNext = totalPostsCount > skipAmount + posts.length;
 
-  const isNext = totalPostsCount > skipAmount + posts.length;
-
-  return { posts, isNext };
+    return { posts, isNext };
+  } catch (error: any) {
+    console.error("Error fetching posts:", error);
+    throw new Error(`Failed to fetch posts: ${error.message}`);
+  }
 }
