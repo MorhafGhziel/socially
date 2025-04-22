@@ -160,8 +160,6 @@
   @apply rounded-3xl bg-primary-500 px-8 py-2 !text-small-regular text-light-1 max-xs:w-full !important;
 }
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -217,8 +215,6 @@
     --chart-5: 340 75% 55%;
   }
 }
-
-
 
 @layer base {
   * {
