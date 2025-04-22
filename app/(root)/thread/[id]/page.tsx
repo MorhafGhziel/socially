@@ -15,9 +15,10 @@ interface ThreadPageProps {
   params: {
     id: string;
   };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-const Page = async ({ params }: ThreadPageProps) => {
+const Page = async ({ params, searchParams }: ThreadPageProps) => {
   if (!params.id) {
     return <div className="text-center mt-10">Thread ID is required</div>;
   }
