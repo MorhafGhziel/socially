@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 interface Props {
   id: string;
@@ -38,6 +41,8 @@ const ThreadCard = ({
   comments,
   isComment,
 }: Props) => {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <article
       className={`flex w-full flex-col ${
@@ -48,12 +53,21 @@ const ThreadCard = ({
         <div className="flex w-full flex-1 flex-row gap-4">
           <div className="flex flex-col items-center">
             <Link href={`/profile/${author.id}`} className="relative h-11 w-11">
-              <Image
-                src={author.image}
-                alt="Profile image"
-                fill
-                className="rounded-full object-cover"
-              />
+              {imageError ? (
+                <div className="h-11 w-11 rounded-full bg-gray-500 flex items-center justify-center">
+                  <span className="text-white text-xs">
+                    {author.name.charAt(0)}
+                  </span>
+                </div>
+              ) : (
+                <Image
+                  src={author.image || "/assets/profile.svg"}
+                  alt="Profile image"
+                  fill
+                  className="rounded-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              )}
             </Link>
 
             <div className="thread-card_bar" />

@@ -90,9 +90,9 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
 }
 
 export async function fetchThreadById(id: string) {
-  connectToDB();
-
   try {
+    await connectToDB();
+
     const thread = await Thread.findById(id)
       .populate({
         path: "author",
@@ -120,8 +120,13 @@ export async function fetchThreadById(id: string) {
       })
       .exec();
 
+    if (!thread) {
+      throw new Error("Thread not found");
+    }
+
     return thread;
   } catch (error: any) {
+    console.error("Error fetching thread:", error);
     throw new Error(`Failed to fetch thread: ${error.message}`);
   }
 }

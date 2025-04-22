@@ -6,94 +6,119 @@ import { redirect } from "next/navigation";
 import Comment from "@/components/forms/Comment";
 import { Metadata } from "next";
 
-type Props = {
-  params: { id: string };
-};
-
 export const metadata: Metadata = {
   title: "Thread | Socially",
   description: "View and reply to thread",
 };
 
-async function Page({ params }: Props) {
-  if (!params.id) return null;
+interface ThreadPageProps {
+  params: {
+    id: string;
+  };
+}
+
+const Page = async ({ params }: ThreadPageProps) => {
+  if (!params.id) {
+    return <div className="text-center mt-10">Thread ID is required</div>;
+  }
 
   const user = await currentUser();
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="text-center mt-10">
+        Please sign in to view this thread
+      </div>
+    );
+  }
 
   const userInfo = await fetchUser(user.id);
-  if (!userInfo?.onboarded) redirect("/onboarding");
+  if (!userInfo?.onboarded) {
+    redirect("/onboarding");
+  }
 
-  const thread = await fetchThreadById(params.id);
-  if (!thread) return null;
+  try {
+    const thread = await fetchThreadById(params.id);
+    if (!thread) {
+      return <div className="text-center mt-10">Thread not found</div>;
+    }
 
-  // Convert MongoDB document to plain object and handle populated fields
-  const populatedThread = JSON.parse(JSON.stringify(thread));
+    // Convert MongoDB document to plain object and handle populated fields
+    const populatedThread = JSON.parse(JSON.stringify(thread));
 
-  return (
-    <section className="relative">
-      <div>
-        <ThreadCard
-          key={populatedThread._id}
-          id={populatedThread._id}
-          currentUserId={user?.id || ""}
-          parentId={populatedThread.parentId || null}
-          content={populatedThread.text}
-          author={{
-            name: populatedThread.author.name,
-            image: populatedThread.author.image,
-            id: populatedThread.author.id,
-          }}
-          community={null}
-          createdAt={new Date(populatedThread.createdAt).toISOString()}
-          comments={populatedThread.children.map((child: any) => ({
-            author: {
-              image: child.author.image,
-            },
-            content: child.text,
-            createdAt: new Date(child.createdAt).toISOString(),
-          }))}
-        />
-      </div>
-
-      <div className="mt-7">
-        <Comment
-          threadId={params.id}
-          currentUserImg={userInfo.image}
-          currentUserId={user.id}
-        />
-
-        <div className="mt-10">
-          {populatedThread.children.map((childItem: any) => (
-            <ThreadCard
-              key={childItem._id}
-              id={childItem._id}
-              currentUserId={user.id}
-              parentId={childItem.parentId || null}
-              content={childItem.text}
-              author={{
-                name: childItem.author.name,
-                image: childItem.author.image,
-                id: childItem.author.id,
-              }}
-              community={null}
-              createdAt={new Date(childItem.createdAt).toISOString()}
-              comments={
-                childItem.children?.map((child: any) => ({
-                  author: {
-                    image: child.author.image,
-                  },
-                  content: child.text,
-                  createdAt: new Date(child.createdAt).toISOString(),
-                })) || []
-              }
-              isComment
-            />
-          ))}
+    return (
+      <section className="relative">
+        <div>
+          <ThreadCard
+            key={populatedThread._id}
+            id={populatedThread._id}
+            currentUserId={user?.id || ""}
+            parentId={populatedThread.parentId || null}
+            content={populatedThread.text}
+            author={{
+              name: populatedThread.author?.name || "Unknown User",
+              image: populatedThread.author?.image || "/assets/profile.svg",
+              id: populatedThread.author?.id || "",
+            }}
+            community={null}
+            createdAt={new Date(populatedThread.createdAt).toISOString()}
+            comments={
+              populatedThread.children?.map((child: any) => ({
+                author: {
+                  image: child.author?.image || "/assets/profile.svg",
+                },
+                content: child.text,
+                createdAt: new Date(child.createdAt).toISOString(),
+              })) || []
+            }
+          />
         </div>
+
+        <div className="mt-7">
+          <Comment
+            threadId={params.id}
+            currentUserImg={userInfo.image}
+            currentUserId={user.id}
+          />
+
+          <div className="mt-10">
+            {populatedThread.children?.map((childItem: any) => (
+              <ThreadCard
+                key={childItem._id}
+                id={childItem._id}
+                currentUserId={user.id}
+                parentId={childItem.parentId || null}
+                content={childItem.text}
+                author={{
+                  name: childItem.author?.name || "Unknown User",
+                  image: childItem.author?.image || "/assets/profile.svg",
+                  id: childItem.author?.id || "",
+                }}
+                community={null}
+                createdAt={new Date(childItem.createdAt).toISOString()}
+                comments={
+                  childItem.children?.map((child: any) => ({
+                    author: {
+                      image: child.author?.image || "/assets/profile.svg",
+                    },
+                    content: child.text,
+                    createdAt: new Date(child.createdAt).toISOString(),
+                  })) || []
+                }
+                isComment
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  } catch (error) {
+    console.error("Error loading thread:", error);
+    return (
+      <div className="text-center mt-10">
+        Error loading thread. Please try again later.
       </div>
-    </section>
-  );
-}
+    );
+  }
+};
 
 export default Page;
