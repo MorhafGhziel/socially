@@ -11,12 +11,12 @@ export const metadata: Metadata = {
   description: "View and reply to thread",
 };
 
-type Props = {
+interface PageProps {
   params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
 
-export default async function Page({ params }: Props) {
+export default async function ThreadPage({ params }: PageProps) {
   if (!params.id) {
     return <div className="text-center mt-10">Thread ID is required</div>;
   }
