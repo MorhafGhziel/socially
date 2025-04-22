@@ -5,7 +5,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Comment from "@/components/forms/Comment";
 
-const page = async ({ params }: { params: { id: string } }) => {
+export default async function Page({ params }: { params: { id: string } }) {
   if (!params.id) return null;
 
   const user = await currentUser();
@@ -84,6 +84,4 @@ const page = async ({ params }: { params: { id: string } }) => {
       </div>
     </section>
   );
-};
-
-export default page;
+}
