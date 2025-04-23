@@ -11,40 +11,39 @@ export const metadata: Metadata = {
   description: "View and reply to thread",
 };
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
+type Props = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-export default async function Page({ params, searchParams }: PageProps) {
+export default async function Page({ params, searchParams }: Props) {
+  const { id } = params;
+
+  if (!id) {
+    return <div className="text-center mt-10">Thread ID is required</div>;
+  }
+
+  const user = await currentUser();
+  if (!user) {
+    return (
+      <div className="text-center mt-10">
+        Please sign in to view this thread
+      </div>
+    );
+  }
+
+  const userInfo = await fetchUser(user.id);
+  if (!userInfo?.onboarded) {
+    redirect("/onboarding");
+  }
+
   try {
-    // Resolve params first since we need the ID
-    const resolvedParams = await params;
-    const { id } = resolvedParams;
-
-    if (!id)
-      return <div className="text-center mt-10">Thread ID is required</div>;
-
-    // Fetch user and thread in parallel
-    const [user, thread] = await Promise.all([
-      currentUser(),
-      fetchThreadById(id),
-    ]);
-
-    if (!user)
-      return (
-        <div className="text-center mt-10">
-          Please sign in to view this thread
-        </div>
-      );
-    if (!thread)
+    const thread = await fetchThreadById(id);
+    if (!thread) {
       return <div className="text-center mt-10">Thread not found</div>;
+    }
 
-    // Fetch user info only if we have a user
-    const userInfo = await fetchUser(user.id);
-    if (!userInfo?.onboarded) redirect("/onboarding");
-
-    // Convert MongoDB document to plain object
+    // Convert MongoDB document to plain object and handle populated fields
     const populatedThread = JSON.parse(JSON.stringify(thread));
 
     return (
@@ -83,7 +82,7 @@ export default async function Page({ params, searchParams }: PageProps) {
           />
 
           <div className="mt-10">
-            {populatedThread.children?.slice(0, 3).map((childItem: any) => (
+            {populatedThread.children?.map((childItem: any) => (
               <ThreadCard
                 key={childItem._id}
                 id={childItem._id}
@@ -98,7 +97,7 @@ export default async function Page({ params, searchParams }: PageProps) {
                 community={null}
                 createdAt={new Date(childItem.createdAt).toISOString()}
                 comments={
-                  childItem.children?.slice(0, 2).map((child: any) => ({
+                  childItem.children?.map((child: any) => ({
                     author: {
                       image: child.author?.image || "/assets/profile.svg",
                     },
