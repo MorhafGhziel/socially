@@ -3,19 +3,18 @@ import { redirect } from "next/navigation";
 import { fetchUser } from "@/lib/actions/user.actions";
 import ProfileHeader from "@/components/shared/ProfileHeader";
 
-interface Props {
-  params: {
-    id: string;
-  };
+type PageProps = {
+  params: Promise<{ id: string }>;
   searchParams: { [key: string]: string | string[] | undefined };
-}
+};
 
-const Page = async ({ params }: Props) => {
+const Page = async ({ params }: PageProps) => {
+  const resolvedParams = await params;
   const user = await currentUser();
   if (!user) return null;
 
   try {
-    const userInfo = await fetchUser(params.id);
+    const userInfo = await fetchUser(resolvedParams.id);
     if (!userInfo) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen">
