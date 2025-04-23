@@ -12,12 +12,13 @@ export const metadata: Metadata = {
 };
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export default async function Page({ params }: PageProps) {
-  const { id } = params;
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
 
   if (!id) {
     return <div className="text-center mt-10">Thread ID is required</div>;
