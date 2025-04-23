@@ -11,12 +11,12 @@ export const metadata: Metadata = {
   description: "View and reply to thread",
 };
 
-type Props = {
+interface PageProps {
   params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
-};
+}
 
-export default async function Page({ params, searchParams }: Props) {
+export default async function Page({ params }: PageProps) {
   const { id } = params;
 
   if (!id) {
