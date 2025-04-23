@@ -5,11 +5,15 @@ import ProfileHeader from "@/components/shared/ProfileHeader";
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-const Page = async ({ params }: PageProps) => {
-  const resolvedParams = await params;
+const Page = async ({ params, searchParams }: PageProps) => {
+  const [resolvedParams, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+
   const user = await currentUser();
   if (!user) return null;
 
