@@ -93,31 +93,23 @@ export async function fetchThreadById(id: string) {
   try {
     await connectToDB();
 
+    // Optimize the query to fetch only necessary fields and limit nested populations
     const thread = await Thread.findById(id)
       .populate({
         path: "author",
         model: User,
-        select: "_id id name image",
+        select: "id name image",
       })
       .populate({
         path: "children",
-        populate: [
-          {
-            path: "author",
-            model: User,
-            select: "_id id name parentId image",
-          },
-          {
-            path: "children",
-            model: "Thread",
-            populate: {
-              path: "author",
-              model: User,
-              select: "_id id name parentId image",
-            },
-          },
-        ],
+        options: { limit: 5 }, // Limit to 5 comments for initial load
+        populate: {
+          path: "author",
+          model: User,
+          select: "id name image",
+        },
       })
+      .lean() // Use lean() for better performance
       .exec();
 
     if (!thread) {
