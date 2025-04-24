@@ -4,9 +4,14 @@ import { fetchUser } from "@/lib/actions/user.actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+interface SearchParams {
+  edit?: string;
+}
+
+interface Props {
+  params: { [key: string]: string | string[] | undefined };
+  searchParams: SearchParams;
+}
 
 async function Page({ searchParams }: Props) {
   const user = await currentUser();
