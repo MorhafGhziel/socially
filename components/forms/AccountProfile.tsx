@@ -15,6 +15,7 @@ import { useUploadThing } from "@/lib/uploadthing";
 import { updateUser } from "@/lib/actions/user.actions";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+
 interface Props {
   user: {
     id: string;
@@ -29,6 +30,9 @@ interface Props {
 
 const AccountProfile = ({ user, btnTitle }: Props) => {
   const [files, setFiles] = useState<File[]>([]);
+  const [fileName, setFileName] = useState<string>(
+    user?.image ? user.image.split("/").pop() || "" : ""
+  );
   const { startUpload } = useUploadThing("media");
   const router = useRouter();
   const pathname = usePathname();
@@ -54,6 +58,7 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setFiles([file]);
+      setFileName(file.name);
 
       if (!file.type.includes("image")) return;
 
@@ -83,7 +88,7 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
         userId: user.id,
         username: values.username,
         name: values.name,
-        bio: values.bio,
+        bio: values.bio || "",
         image: imageUrl,
         path: pathname,
       });
@@ -108,7 +113,7 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
           control={form.control}
           name="profile_photo"
           render={({ field }) => (
-            <FormItem className="flex items-center gap-3 ">
+            <FormItem className="flex items-center gap-3">
               <FormLabel className="account-form_image-label">
                 {field.value ? (
                   <div className="relative h-24 w-24 object-cover">
@@ -137,7 +142,6 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                 <Input
                   type="file"
                   accept="image/*"
-                  placeholder="Upload a photo"
                   className="account-form_image-input"
                   onChange={(e) => handleImage(e, field.onChange)}
                 />
@@ -149,9 +153,9 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem className="flex flex-col gap-3 w-full">
-              <FormLabel className="text-base-semibold text-light-2 ">
+              <FormLabel className="text-base-semibold text-light-2">
                 Name
               </FormLabel>
               <FormControl>
@@ -161,6 +165,9 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                   className="account-form_input no-focus"
                 />
               </FormControl>
+              {fieldState.error && (
+                <p className="text-red-500">{fieldState.error.message}</p>
+              )}
             </FormItem>
           )}
         />
@@ -168,7 +175,7 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
         <FormField
           control={form.control}
           name="username"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem className="flex flex-col gap-3 w-full">
               <FormLabel className="text-light-2">Username</FormLabel>
               <FormControl>
@@ -178,6 +185,9 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                   className="account-form_input no-focus"
                 />
               </FormControl>
+              {fieldState.error && (
+                <p className="text-red-500">{fieldState.error.message}</p>
+              )}
             </FormItem>
           )}
         />
@@ -185,10 +195,10 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
         <FormField
           control={form.control}
           name="bio"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem className="flex flex-col gap-3 w-full">
               <FormLabel className="text-base-semibold text-light-2">
-                Bio
+                Bio (Optional)
               </FormLabel>
               <FormControl>
                 <Textarea
@@ -197,6 +207,9 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
                   className="account-form_input no-focus"
                 />
               </FormControl>
+              {fieldState.error && (
+                <p className="text-red-500">{fieldState.error.message}</p>
+              )}
             </FormItem>
           )}
         />

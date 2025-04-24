@@ -1,19 +1,23 @@
 import AccountProfile from "@/components/forms/AccountProfile";
 import { currentUser } from "@clerk/nextjs/server";
+import { fetchUser } from "@/lib/actions/user.actions";
 
 async function Page() {
   const user = await currentUser();
+  if (!user) return null;
 
+  // Fetch existing user data from our database
+  const userInfo = await fetchUser(user.id);
+
+  // Convert MongoDB document to a plain object and ensure all fields are serializable
   const userData = {
-    id: user?.id || "",
-    objectId: user?.id || "",
-    username: user?.username || "",
-    name: user?.firstName || "",
-    bio: "",
-    image: user?.imageUrl || "",
+    id: user.id,
+    objectId: userInfo ? userInfo._id.toString() : user.id, // Convert ObjectId to string
+    username: userInfo?.username || user?.username || "",
+    name: userInfo?.name || user?.firstName || "",
+    bio: userInfo?.bio || "",
+    image: userInfo?.image || user?.imageUrl || "",
   };
-
-  const userInfo = {};
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col justify-start px-10 py-20">

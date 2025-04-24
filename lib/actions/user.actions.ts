@@ -64,11 +64,11 @@ export async function updateUser({
       {
         username: username.toLowerCase(),
         name,
-        bio,
+        bio: bio || "",
         image,
         onboarded: true,
       },
-      { upsert: true, new: true } // This will create the user if it doesn't exist
+      { upsert: true, new: true }
     );
 
     if (path === "/profile/edit") {
