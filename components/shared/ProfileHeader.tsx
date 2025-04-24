@@ -45,7 +45,7 @@ const ProfileHeader = async ({
         </div>
 
         {isCurrentUser && (
-          <Link href="/profile/edit">
+          <Link href="/onboarding">
             <Button className="bg-primary-500 hover:bg-primary-600">
               Edit Profile
             </Button>
