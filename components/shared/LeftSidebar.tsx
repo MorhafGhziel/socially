@@ -24,7 +24,11 @@ function LeftSidebar() {
             pathname === link.route;
 
           if (link.route === "/profile") {
-            link.route = `${link.route}/${userId}`;
+            if (userId) {
+              link.route = `${link.route}/${userId}`;
+            } else {
+              return null; // Don't render the profile link until userId is available
+            }
           }
 
           return (

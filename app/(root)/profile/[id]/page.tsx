@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { fetchUser } from "@/lib/actions/user.actions";
 import ProfileHeader from "@/components/shared/ProfileHeader";
+import ThreadsTab from "@/components/shared/ThreadsTab";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -43,6 +44,14 @@ const Page = async ({ params, searchParams }: PageProps) => {
           imgUrl={userInfo.image}
           bio={userInfo.bio}
         />
+
+        <div className="mt-9">
+          <ThreadsTab
+            currentUserId={user.id}
+            accountId={userInfo.id}
+            accountType="User"
+          />
+        </div>
       </section>
     );
   } catch (error) {
