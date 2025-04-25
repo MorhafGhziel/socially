@@ -4,11 +4,11 @@ import { fetchUser } from "@/lib/actions/user.actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-type PageProps = {
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+interface Props {
+  searchParams: Record<string, string | string[] | undefined>;
+}
 
-const Page = async ({ searchParams }: PageProps) => {
+const Page = async ({ searchParams }: Props) => {
   const user = await currentUser();
   if (!user) return null;
 
