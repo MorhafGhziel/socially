@@ -4,12 +4,9 @@ import { fetchUser } from "@/lib/actions/user.actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export interface PageProps {
-  params: Record<string, never>;
-  searchParams: {
-    edit?: string;
-  };
-}
+type PageProps = {
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
 const Page = async ({ searchParams }: PageProps) => {
   const user = await currentUser();
