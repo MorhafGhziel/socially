@@ -118,9 +118,15 @@ const ThreadCard = ({
 
               {comments.length > 0 && (
                 <Link href={`/thread/${id}`}>
-                  <p className="mt-1 text-subtle-medium text-gray-1">
-                    {comments.length}{" "}
-                    {comments.length === 1 ? "reply" : "replies"}
+                  <p className="mt-1 text-subtle-medium text-gray-1 flex items-center gap-1">
+                    <Image
+                      src={comments[0].author.image || "/assets/profile.svg"}
+                      alt="Reply user"
+                      width={20}
+                      height={20}
+                      className="rounded-full object-cover border border-gray-700 inline-block"
+                    />
+                    replied
                   </p>
                 </Link>
               )}
