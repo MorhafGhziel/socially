@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { currentUser } from "@clerk/nextjs/server";
 
 interface Props {
   accountId: string;
@@ -20,8 +19,7 @@ const ProfileHeader = async ({
   imgUrl,
   bio,
 }: Props) => {
-  const user = await currentUser();
-  const isCurrentUser = user?.id === authUserId;
+  const isCurrentUser = accountId === authUserId;
 
   return (
     <div className="flex w-full flex-col justify-start">
