@@ -58,6 +58,12 @@ export default function SearchPage() {
                     <span className="text-light-3 text-xs">
                       @{user.username}
                     </span>
+                    <a
+                      href={`/profile/${user.id}`}
+                      className="ml-auto bg-primary-500 text-light-1 px-4 py-1.5 rounded-lg text-sm hover:bg-primary-600 transition-colors"
+                    >
+                      View
+                    </a>
                   </li>
                 ))}
               </ul>
