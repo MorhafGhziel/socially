@@ -1,94 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
-export default function SearchPage() {
+interface User {
+  id: string;
+  name: string;
+  username: string;
+  image: string;
+  bio?: string;
+}
+
+const SearchPage = () => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<{ users: any[]; threads: any[] }>({
-    users: [],
-    threads: [],
-  });
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  async function handleSearch(e: React.FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await fetch("/api/users");
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error("Error loading users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
+
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-    const data = await res.json();
-    setResults(data);
-    setLoading(false);
-  }
+    try {
+      const response = await fetch(
+        `/api/search/users?q=${encodeURIComponent(query)}`
+      );
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error searching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = query
+    ? users.filter(
+        (user) =>
+          user.name?.toLowerCase().includes(query.toLowerCase()) ||
+          user.username?.toLowerCase().includes(query.toLowerCase())
+      )
+    : users;
 
   return (
-    <main className="max-w-2xl mx-auto py-10 px-4">
-      <h1 className="head-text mb-6">Search</h1>
-      <form onSubmit={handleSearch} className="flex gap-2 mb-6">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search users..."
-          className="flex-1 px-4 py-2 rounded-lg bg-dark-3 text-light-1 border border-dark-4 focus:outline-none"
-        />
-        <button
-          type="submit"
-          className="bg-primary-500 text-light-1 px-4 py-2 rounded-lg"
-        >
-          Search
-        </button>
-      </form>
-      {loading && <p className="text-light-3">Searching...</p>}
-      {!loading && (results.users.length > 0 || results.threads.length > 0) && (
-        <div className="space-y-6">
-          {results.users.length > 0 && (
-            <div>
-              <h2 className="text-light-2 text-lg mb-2">Users</h2>
-              <ul className="space-y-2">
-                {results.users.map((user) => (
-                  <li
-                    key={user.id}
-                    className="flex items-center gap-3 bg-dark-2 p-3 rounded-lg"
-                  >
+    <div className="flex min-h-screen bg-[#121212]">
+      <div className="flex-1 p-6">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-white mb-4">Search Users</h1>
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search users..."
+              className="w-full px-4 py-2 bg-[#1E1E1E] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <button
+              type="submit"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-purple-500 px-4 py-1 rounded-md text-white"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
+        <div className="bg-[#1E1E1E] p-6 rounded-lg">
+          <h2 className="text-xl font-semibold text-white mb-4">
+            {query ? "Search Results" : "Suggested Users"}
+          </h2>
+          {loading ? (
+            <p className="text-gray-400">Loading users...</p>
+          ) : filteredUsers.length > 0 ? (
+            <div className="space-y-4">
+              {filteredUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between bg-[#2A2A2A] p-4 rounded-lg hover:bg-[#333333] transition-colors"
+                >
+                  <div className="flex items-center gap-3">
                     <img
                       src={user.image}
                       alt={user.name}
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover"
                     />
-                    <span className="text-light-1">{user.name}</span>
-                    <span className="text-light-3 text-xs">
-                      @{user.username}
-                    </span>
-                    <a
-                      href={`/profile/${user.id}`}
-                      className="ml-auto bg-primary-500 text-light-1 px-4 py-1.5 rounded-lg text-sm hover:bg-primary-600 transition-colors"
-                    >
-                      View
-                    </a>
-                  </li>
-                ))}
-              </ul>
+                    <div>
+                      <h3 className="text-white font-medium">{user.name}</h3>
+                      <p className="text-gray-400 text-sm">@{user.username}</p>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/profile/${user.id}`}
+                    className="bg-purple-500 px-4 py-1 rounded-md text-white text-sm hover:bg-purple-600 transition-colors"
+                  >
+                    View Profile
+                  </Link>
+                </div>
+              ))}
             </div>
-          )}
-          {results.threads.length > 0 && (
-            <div>
-              <h2 className="text-light-2 text-lg mb-2">Threads</h2>
-              <ul className="space-y-2">
-                {results.threads.map((thread) => (
-                  <li key={thread.id} className="bg-dark-2 p-3 rounded-lg">
-                    <span className="text-light-1">{thread.text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          ) : (
+            <p className="text-gray-400">No users found</p>
           )}
         </div>
-      )}
-      {!loading &&
-        query &&
-        results.users.length === 0 &&
-        results.threads.length === 0 && (
-          <p className="text-light-3">No results found.</p>
-        )}
-    </main>
+      </div>
+    </div>
   );
-}
+};
+
+export default SearchPage;
