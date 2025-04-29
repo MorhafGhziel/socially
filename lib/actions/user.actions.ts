@@ -262,3 +262,22 @@ export async function fetchCommunityThreads(communityId: string) {
     throw error;
   }
 }
+
+export async function fetchSuggestedUsers(userId: string, limit: number = 4) {
+  try {
+    await connectToDB();
+
+    // Find users except the current user
+    const suggestedUsers = await User.find({
+      id: { $ne: userId },
+      onboarded: true,
+    })
+      .select("id name username image")
+      .limit(limit);
+
+    return suggestedUsers;
+  } catch (error: any) {
+    console.error("Error fetching suggested users:", error);
+    throw error;
+  }
+}
