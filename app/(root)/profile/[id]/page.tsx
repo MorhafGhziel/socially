@@ -16,7 +16,6 @@ const Page = async ({ params, searchParams }: PageProps) => {
   ]);
 
   const user = await currentUser();
-  if (!user) return null;
 
   try {
     const userInfo = await fetchUser(resolvedParams.id);
@@ -38,7 +37,7 @@ const Page = async ({ params, searchParams }: PageProps) => {
       <section>
         <ProfileHeader
           accountId={userInfo.id}
-          authUserId={user.id}
+          authUserId={user?.id || ""}
           name={userInfo.name}
           username={userInfo.username}
           imgUrl={userInfo.image}
@@ -47,7 +46,7 @@ const Page = async ({ params, searchParams }: PageProps) => {
 
         <div className="mt-9">
           <ThreadsTab
-            currentUserId={user.id}
+            currentUserId={user?.id || ""}
             accountId={userInfo.id}
             accountType="User"
           />
