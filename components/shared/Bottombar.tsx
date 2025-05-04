@@ -4,7 +4,7 @@ import { sidebarLinks } from "@/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { useAuth, SignedIn, SignedOut } from "@clerk/nextjs";
 
 function Bottombar() {
   const pathname = usePathname();
@@ -46,19 +46,20 @@ function Bottombar() {
         })}
         {/* Show Sign In button in place of profile link if not signed in */}
         <SignedOut>
-          <SignInButton mode="modal">
-            <button className="bottombar_link flex flex-col items-center justify-center">
-              <Image
-                src="/assets/user.svg"
-                alt="Sign In"
-                width={24}
-                height={24}
-              />
-              <span className="text-subtle-medium text-light-1 max-sm:hidden">
-                Sign In
-              </span>
-            </button>
-          </SignInButton>
+          <Link
+            href="/sign-in"
+            className="bottombar_link flex flex-col items-center justify-center"
+          >
+            <Image
+              src="/assets/user.svg"
+              alt="Sign In"
+              width={24}
+              height={24}
+            />
+            <span className="text-subtle-medium text-light-1 max-sm:hidden">
+              Sign In
+            </span>
+          </Link>
         </SignedOut>
       </div>
     </section>

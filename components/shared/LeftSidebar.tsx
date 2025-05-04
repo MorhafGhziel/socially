@@ -83,14 +83,13 @@ function LeftSidebar() {
           </SignOutButton>
         </SignedIn>
         <SignedOut>
-          <SignInButton mode="modal">
-            <button
-              className="leftsidebar_link w-full flex items-center justify-center gap-2 mt-2 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg py-3 px-4 transition-colors duration-200 hover:from-primary-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-base sm:text-lg max-w-full"
-              style={{ minHeight: 48 }}
-            >
-              <span className="text-white font-semibold">Sign In</span>
-            </button>
-          </SignInButton>
+          <Link
+            href="/sign-in"
+            className="leftsidebar_link w-full flex items-center justify-center gap-2 mt-2 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg py-3 px-4 transition-colors duration-200 hover:from-primary-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-base sm:text-lg max-w-full"
+            style={{ minHeight: 48 }}
+          >
+            <span className="text-white font-semibold">Sign In</span>
+          </Link>
         </SignedOut>
       </div>
     </section>
