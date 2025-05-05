@@ -5,6 +5,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Comment from "@/components/forms/Comment";
 import { Metadata } from "next";
+import AuthRequiredMessage from "@/components/shared/AuthRequiredMessage";
 
 export const metadata: Metadata = {
   title: "Thread | Socially",
@@ -30,9 +31,7 @@ export default async function Page({ params, searchParams }: PageProps) {
   const user = await currentUser();
   if (!user) {
     return (
-      <div className="text-center mt-10">
-        Please sign in to view this thread
-      </div>
+      <AuthRequiredMessage message="You must be signed in to view this thread." />
     );
   }
 
