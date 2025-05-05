@@ -57,11 +57,16 @@ const SearchPage = () => {
     : users;
 
   return (
-    <div className="flex min-h-screen bg-[#121212]">
-      <div className="flex-1 p-6">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-4">Search Users</h1>
-          <form onSubmit={handleSearch} className="relative">
+    <div className="flex min-h-screen bg-[#121212] justify-center px-2 sm:px-0">
+      <div className="w-full max-w-xl p-2 sm:p-6 mx-auto">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-4">
+            Search Users
+          </h1>
+          <form
+            onSubmit={handleSearch}
+            className="flex flex-col sm:flex-row gap-2 relative"
+          >
             <input
               type="text"
               value={query}
@@ -71,25 +76,25 @@ const SearchPage = () => {
             />
             <button
               type="submit"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-purple-500 px-4 py-1 rounded-md text-white"
+              className="bg-purple-500 px-4 py-2 rounded-lg text-white font-semibold hover:bg-purple-600 transition-colors w-full sm:w-auto"
             >
               Search
             </button>
           </form>
         </div>
 
-        <div className="bg-[#1E1E1E] p-6 rounded-lg">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <div className="bg-[#1E1E1E] p-3 sm:p-6 rounded-lg">
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">
             {query ? "Search Results" : "Suggested Users"}
           </h2>
           {loading ? (
             <p className="text-gray-400">Loading users...</p>
           ) : filteredUsers.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filteredUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center justify-between bg-[#2A2A2A] p-4 rounded-lg hover:bg-[#333333] transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-[#2A2A2A] p-4 rounded-lg hover:bg-[#333333] transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <img
@@ -104,7 +109,7 @@ const SearchPage = () => {
                   </div>
                   <Link
                     href={`/profile/${user.id}`}
-                    className="bg-purple-500 px-4 py-1 rounded-md text-white text-sm hover:bg-purple-600 transition-colors"
+                    className="bg-purple-500 px-4 py-2 rounded-lg text-white text-sm font-semibold hover:bg-purple-600 transition-colors text-center"
                   >
                     View Profile
                   </Link>
