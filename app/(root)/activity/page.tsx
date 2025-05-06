@@ -6,9 +6,11 @@ export default async function ActivityPage() {
   const user = await currentUser();
   if (!user) {
     return (
-      <section className="main-container px-2 sm:px-6 py-6 w-full max-w-2xl mx-auto">
-        <h1 className="head-text text-left mb-6">Activity</h1>
-        <p className="no-result">
+      <section className="flex flex-col items-center justify-center min-h-[70vh]">
+        <h1 className="text-4xl font-extrabold mb-8 text-white drop-shadow-lg tracking-tight">
+          Activity
+        </h1>
+        <p className="text-lg text-gray-400 bg-dark-2/80 px-8 py-6 rounded-2xl border border-gray-700 shadow-xl backdrop-blur-md">
           You must be signed in to view your activity.
         </p>
       </section>
@@ -18,38 +20,43 @@ export default async function ActivityPage() {
   const activities = await fetchActivityForUser(user.id);
 
   return (
-    <section className="main-container px-2 sm:px-6 py-6 w-full max-w-2xl mx-auto">
-      <h1 className="head-text text-left mb-6">Activity</h1>
-      <div className="flex flex-col gap-4">
+    <section className="flex flex-col items-center justify-center min-h-[70vh]">
+      <h1 className="text-4xl font-extrabold mb-8 text-white drop-shadow-lg tracking-tight">
+        Activity
+      </h1>
+      <div className="w-full max-w-2xl flex flex-col gap-6">
         {activities.length === 0 ? (
-          <p className="no-result">No activity yet</p>
+          <p className="text-lg text-gray-400 bg-dark-2/80 px-8 py-6 rounded-2xl border border-gray-700 shadow-xl backdrop-blur-md">
+            No activity yet
+          </p>
         ) : (
           activities.map((activity: any) => (
             <div
               key={activity.id}
-              className="activity-card flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-dark-2 rounded-lg p-4 w-full shadow-md"
+              className="group transition-all duration-200 bg-gradient-to-br from-dark-2/80 to-dark-3/80 border border-gray-700/60 shadow-2xl rounded-2xl px-8 py-6 flex items-center gap-6 hover:scale-[1.025] hover:border-primary-500/80 hover:shadow-primary-500/20 backdrop-blur-md"
+              style={{ backdropFilter: "blur(12px)" }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <Image
                   src={activity.user.image}
                   alt={activity.user.name}
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover"
+                  width={56}
+                  height={56}
+                  className="rounded-full object-cover border-2 border-primary-500/40 group-hover:border-primary-500 shadow-md"
                 />
                 <div>
-                  <span className="text-light-1 font-semibold">
+                  <span className="text-lg font-bold text-white">
                     {activity.user.name}
                   </span>
-                  <span className="text-gray-400 ml-2 text-sm">
+                  <span className="text-gray-400 ml-2 text-base">
                     @{activity.user.username}
                   </span>
-                  <span className="block text-light-2 mt-1 text-base">
+                  <span className="block text-light-2 mt-1 text-lg">
                     {activity.message}
                   </span>
                 </div>
               </div>
-              <span className="ml-auto text-xs text-gray-500 mt-2 sm:mt-0">
+              <span className="ml-auto text-sm text-gray-400 font-mono opacity-80">
                 {activity.time instanceof Date
                   ? activity.time.toLocaleString()
                   : activity.time}
