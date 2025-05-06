@@ -166,3 +166,47 @@ export async function addCommentToThread(
     throw new Error(`Failed to add comment: ${error.message}`);
   }
 }
+
+export async function fetchActivityForUser(userId: string) {
+  try {
+    await connectToDB();
+    // Find the user
+    const user = await User.findOne({ id: userId });
+    if (!user) return [];
+    // Find all threads authored by the user
+    const userThreads = await Thread.find({ author: user._id });
+    const userThreadIds = userThreads.map((t) => t._id);
+    // Find all replies/comments where parentId is one of the user's threads
+    const replies = await Thread.find({ parentId: { $in: userThreadIds } })
+      .populate({
+        path: "author",
+        model: User,
+        select: "id name username image",
+      })
+      .populate({
+        path: "parentId",
+        model: Thread,
+        select: "_id text",
+      })
+      .sort({ createdAt: -1 });
+    return replies.map((reply) => ({
+      id: reply._id.toString(),
+      type: "reply",
+      user: {
+        id: reply.author?.id || "",
+        name: reply.author?.name || "Unknown User",
+        username: reply.author?.username || "",
+        image: reply.author?.image || "/assets/profile.svg",
+      },
+      message: `replied to your thread: "${
+        typeof reply.parentId === "object" && reply.parentId?.text
+          ? reply.parentId.text.slice(0, 30)
+          : "..."
+      }"`,
+      time: reply.createdAt,
+    }));
+  } catch (error) {
+    console.error("Error fetching activity:", error);
+    return [];
+  }
+}
