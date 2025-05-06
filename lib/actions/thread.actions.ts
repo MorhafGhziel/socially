@@ -189,22 +189,40 @@ export async function fetchActivityForUser(userId: string) {
         select: "_id text",
       })
       .sort({ createdAt: -1 });
-    return replies.map((reply) => ({
-      id: reply._id.toString(),
-      type: "reply",
-      user: {
-        id: reply.author?.id || "",
-        name: reply.author?.name || "Unknown User",
-        username: reply.author?.username || "",
-        image: reply.author?.image || "/assets/profile.svg",
-      },
-      message: `replied to your thread: "${
-        typeof reply.parentId === "object" && reply.parentId?.text
-          ? reply.parentId.text.slice(0, 30)
-          : "..."
-      }"`,
-      time: reply.createdAt,
-    }));
+    return replies.map((reply) => {
+      // Defensive checks for populated author and parentId
+      const authorObj =
+        reply.author && typeof reply.author === "object" && "id" in reply.author
+          ? (reply.author as unknown as {
+              id?: string;
+              name?: string;
+              username?: string;
+              image?: string;
+            })
+          : null;
+      const parentObj =
+        reply.parentId &&
+        typeof reply.parentId === "object" &&
+        "text" in reply.parentId
+          ? (reply.parentId as unknown as { text?: string })
+          : null;
+      return {
+        id: reply._id.toString(),
+        type: "reply",
+        user: {
+          id: authorObj?.id || "",
+          name: authorObj?.name || "Unknown User",
+          username: authorObj?.username || "",
+          image: authorObj?.image || "/assets/profile.svg",
+        },
+        message: `replied to your thread: "${
+          parentObj?.text && typeof parentObj.text === "string"
+            ? parentObj.text.slice(0, 30)
+            : "..."
+        }"`,
+        time: reply.createdAt,
+      };
+    });
   } catch (error) {
     console.error("Error fetching activity:", error);
     return [];
