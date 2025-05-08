@@ -189,7 +189,15 @@ export async function fetchActivityForUser(userId: string) {
         select: "_id text",
       })
       .sort({ createdAt: -1 });
-    return replies.map((reply) => {
+    // Filter out replies authored by the user themselves
+    const filteredReplies = replies.filter(
+      (reply) =>
+        reply.author &&
+        typeof reply.author === "object" &&
+        "id" in reply.author &&
+        String(reply.author.id) !== String(userId)
+    );
+    return filteredReplies.map((reply) => {
       // Defensive checks for populated author and parentId
       const authorObj =
         reply.author && typeof reply.author === "object" && "id" in reply.author
