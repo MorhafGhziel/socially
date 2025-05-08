@@ -186,7 +186,7 @@ export async function fetchActivityForUser(userId: string) {
       .populate({
         path: "parentId",
         model: Thread,
-        select: "_id text",
+        select: "_id text parentId",
       })
       .sort({ createdAt: -1 });
     // Filter out replies authored by the user themselves
@@ -212,16 +212,21 @@ export async function fetchActivityForUser(userId: string) {
         reply.parentId &&
         typeof reply.parentId === "object" &&
         "text" in reply.parentId
-          ? (reply.parentId as unknown as { text?: string })
+          ? (reply.parentId as unknown as {
+              text?: string;
+              parentId?: string | null;
+            })
           : null;
-      const isReplyToPost = parentObj === null;
-      const message = isReplyToPost
-        ? `replied to your thread: "${
+      // parentObj is the parent thread (the thing being replied to)
+      // If parentObj has a parentId, it's a comment; if not, it's a post
+      const isReplyToComment = parentObj && parentObj.parentId;
+      const message = isReplyToComment
+        ? `replied to your comment: "${
             reply.text && typeof reply.text === "string"
               ? reply.text.slice(0, 30)
               : "..."
           }"`
-        : `replied to your comment: "${
+        : `commented on your post: "${
             reply.text && typeof reply.text === "string"
               ? reply.text.slice(0, 30)
               : "..."
