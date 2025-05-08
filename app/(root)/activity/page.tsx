@@ -6,13 +6,13 @@ export default async function ActivityPage() {
   const user = await currentUser();
   if (!user) {
     return (
-      <section className="flex flex-col items-center justify-center min-h-[70vh]">
-        <h1 className="text-4xl font-extrabold mb-8 text-white drop-shadow-lg tracking-tight">
-          Activity
-        </h1>
-        <p className="text-lg text-gray-400 bg-dark-2/80 px-8 py-6 rounded-2xl border border-gray-700 shadow-xl backdrop-blur-md">
-          You must be signed in to view your activity.
-        </p>
+      <section className="flex flex-col min-h-[70vh]">
+        <h1 className="head-text">Activity</h1>
+        <div className="w-full">
+          <p className="text-lg text-gray-400 bg-dark-2/80 px-8 py-6 rounded-2xl border border-gray-700 shadow-xl backdrop-blur-md mt-8">
+            You must be signed in to view your activity.
+          </p>
+        </div>
       </section>
     );
   }
@@ -20,11 +20,9 @@ export default async function ActivityPage() {
   const activities = await fetchActivityForUser(user.id);
 
   return (
-    <section className="flex flex-col items-center justify-center min-h-[70vh]">
-      <h1 className="text-4xl font-extrabold mb-8 text-white drop-shadow-lg tracking-tight">
-        Activity
-      </h1>
-      <div className="w-full max-w-2xl flex flex-col gap-6">
+    <section className="flex flex-col min-h-[70vh]">
+      <h1 className="head-text">Activity</h1>
+      <div className="w-full flex flex-col gap-6 mt-9">
         {activities.length === 0 ? (
           <p className="text-lg text-gray-400 bg-dark-2/80 px-8 py-6 rounded-2xl border border-gray-700 shadow-xl backdrop-blur-md">
             No activity yet
