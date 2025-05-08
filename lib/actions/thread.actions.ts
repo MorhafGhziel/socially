@@ -214,6 +214,18 @@ export async function fetchActivityForUser(userId: string) {
         "text" in reply.parentId
           ? (reply.parentId as unknown as { text?: string })
           : null;
+      const isReplyToPost = parentObj === null;
+      const message = isReplyToPost
+        ? `replied to your thread: "${
+            reply.text && typeof reply.text === "string"
+              ? reply.text.slice(0, 30)
+              : "..."
+          }"`
+        : `replied to your comment: "${
+            reply.text && typeof reply.text === "string"
+              ? reply.text.slice(0, 30)
+              : "..."
+          }"`;
       return {
         id: reply._id.toString(),
         type: "reply",
@@ -223,11 +235,7 @@ export async function fetchActivityForUser(userId: string) {
           username: authorObj?.username || "",
           image: authorObj?.image || "/assets/profile.svg",
         },
-        message: `replied to your thread: "${
-          parentObj?.text && typeof parentObj.text === "string"
-            ? parentObj.text.slice(0, 30)
-            : "..."
-        }"`,
+        message,
         time: reply.createdAt,
       };
     });
