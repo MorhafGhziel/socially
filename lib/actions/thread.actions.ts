@@ -140,6 +140,7 @@ export async function addCommentToThread(
   try {
     await connectToDB();
 
+    // Find the original thread
     const originalThread = await Thread.findById(threadId);
     if (!originalThread) throw new Error("Thread not found");
 
