@@ -248,3 +248,30 @@ export async function fetchActivityForUser(userId: string) {
     return [];
   }
 }
+
+export async function deleteThread(threadId: string, path: string) {
+  try {
+    await connectToDB();
+
+    // Find the thread
+    const thread = await Thread.findById(threadId);
+    if (!thread) throw new Error("Thread not found");
+
+    // Delete all child threads (comments)
+    await Thread.deleteMany({ parentId: threadId });
+
+    // Delete the thread itself
+    await Thread.findByIdAndDelete(threadId);
+
+    // Update user's threads array
+    await User.findByIdAndUpdate(thread.author, {
+      $pull: { threads: threadId },
+    });
+
+    revalidatePath(path);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error deleting thread:", error);
+    throw new Error(`Failed to delete thread: ${error.message}`);
+  }
+}

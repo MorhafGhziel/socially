@@ -3,6 +3,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { deleteThread } from "@/lib/actions/thread.actions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Props {
   id: string;
@@ -42,6 +60,19 @@ const ThreadCard = ({
   isComment,
 }: Props) => {
   const [imageError, setImageError] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const isAuthor = currentUserId === author.id;
+
+  const handleDelete = async () => {
+    try {
+      await deleteThread(id, pathname || "/");
+      router.refresh();
+    } catch (error) {
+      console.error("Error deleting thread:", error);
+    }
+  };
 
   return (
     <article
@@ -74,11 +105,44 @@ const ThreadCard = ({
           </div>
 
           <div className="flex w-full flex-col">
-            <Link href={`/profile/${author.id}`} className="w-fit">
-              <h4 className="cursor-pointer text-base-semibold text-light-1">
-                {author.name}
-              </h4>
-            </Link>
+            <div className="flex justify-between items-center">
+              <Link href={`/profile/${author.id}`} className="w-fit">
+                <h4 className="cursor-pointer text-base-semibold text-light-1">
+                  {author.name}
+                </h4>
+              </Link>
+              {isAuthor && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="transition-colors"
+                      style={{ color: "#ef4444" }}
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-dark-2 border-dark-4">
+                    <DropdownMenuItem
+                      className="text-red-500 focus:text-red-500 focus:bg-dark-3 cursor-pointer"
+                      onClick={() => setShowDeleteDialog(true)}
+                    >
+                      Delete Post
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
 
             <p className="mt-2 text-small-regular text-light-2">{content}</p>
 
@@ -134,6 +198,31 @@ const ThreadCard = ({
           </div>
         </div>
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-dark-2 border-dark-4">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-light-1">
+              Delete Post
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-light-2">
+              Are you sure you want to delete this post? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-dark-3 text-light-1 border-dark-4 hover:bg-dark-4">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 };
