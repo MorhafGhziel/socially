@@ -46,6 +46,7 @@ interface PopulatedThread {
   createdAt: Date;
   parentId?: mongoose.Types.ObjectId | null;
   children: PopulatedChild[];
+  likes: PopulatedAuthor[];
 }
 
 export async function updateUser({
@@ -83,7 +84,13 @@ export async function fetchUser(userId: string) {
   try {
     connectToDB();
 
-    return await User.findOne({ id: userId });
+    const user = await User.findOne({ id: userId });
+    if (!user) {
+      console.log("User not found with id:", userId);
+      return null;
+    }
+
+    return user;
   } catch (error: any) {
     throw new Error(`Failed to fetch user: ${error.message}`);
   }
@@ -122,6 +129,11 @@ export async function fetchUserThreads(userId: string) {
           select: "_id id name image username",
         },
       })
+      .populate<{ likes: PopulatedAuthor[] }>({
+        path: "likes",
+        model: User,
+        select: "id",
+      })
       .sort({ createdAt: "desc" })
       .lean()) as unknown as PopulatedThread[];
 
@@ -143,6 +155,11 @@ export async function fetchUserThreads(userId: string) {
           model: User,
           select: "_id id name image username",
         },
+      })
+      .populate<{ likes: PopulatedAuthor[] }>({
+        path: "likes",
+        model: User,
+        select: "id",
       })
       .sort({ createdAt: "desc" })
       .lean()) as unknown as PopulatedThread[];
@@ -176,6 +193,7 @@ export async function fetchUserThreads(userId: string) {
         },
         createdAt: child.createdAt.toISOString(),
       })),
+      likes: thread.likes.map((like) => like.id),
     }));
 
     const formattedReplies = userReplies.map((reply) => ({
@@ -187,8 +205,9 @@ export async function fetchUserThreads(userId: string) {
         image: reply.author.image,
         username: reply.author.username,
       },
-      parentId: reply.parentId?._id.toString() || null,
+      parentId: reply.parentId?.toString() || null,
       createdAt: reply.createdAt.toISOString(),
+      likes: reply.likes.map((like) => like.id),
     }));
 
     return {
@@ -196,8 +215,8 @@ export async function fetchUserThreads(userId: string) {
       replies: formattedReplies,
     };
   } catch (error: any) {
-    console.error("Error fetching user content:", error);
-    return { threads: [], replies: [] };
+    console.error("Error fetching user threads:", error);
+    throw new Error(`Failed to fetch user threads: ${error.message}`);
   }
 }
 
@@ -222,6 +241,11 @@ export async function fetchCommunityThreads(communityId: string) {
           model: User,
           select: "_id id name image username",
         },
+      })
+      .populate<{ likes: PopulatedAuthor[] }>({
+        path: "likes",
+        model: User,
+        select: "id",
       })
       .exec();
 
@@ -254,6 +278,7 @@ export async function fetchCommunityThreads(communityId: string) {
         },
         createdAt: child.createdAt.toISOString(),
       })),
+      likes: thread.likes.map((like) => like.id),
     }));
 
     return { threads: formattedThreads };

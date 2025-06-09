@@ -73,6 +73,11 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
           model: User,
           select: "id name image",
         },
+      })
+      .populate({
+        path: "likes",
+        model: User,
+        select: "id",
       });
 
     const [posts, totalPostsCount] = await Promise.all([
@@ -117,6 +122,11 @@ export async function fetchThreadById(id: string) {
             },
           },
         ],
+      })
+      .populate({
+        path: "likes",
+        model: User,
+        select: "id",
       })
       .exec();
 
@@ -166,6 +176,41 @@ export async function addCommentToThread(
   }
 }
 
+export async function toggleLike(
+  threadId: string,
+  userId: string,
+  path: string
+) {
+  try {
+    await connectToDB();
+
+    // Find the user using Clerk ID
+    const user = await User.findOne({ id: userId });
+    if (!user) throw new Error("User not found");
+
+    const thread = await Thread.findById(threadId);
+    if (!thread) throw new Error("Thread not found");
+
+    const userLikedIndex = thread.likes.indexOf(user._id);
+
+    if (userLikedIndex === -1) {
+      // User hasn't liked the thread yet, so add the like
+      thread.likes.push(user._id);
+    } else {
+      // User has already liked the thread, so remove the like
+      thread.likes.splice(userLikedIndex, 1);
+    }
+
+    await thread.save();
+    revalidatePath(path);
+
+    return { likes: thread.likes.length };
+  } catch (error: any) {
+    console.error("Error toggling like:", error);
+    throw new Error(`Failed to toggle like: ${error.message}`);
+  }
+}
+
 export async function fetchActivityForUser(userId: string) {
   try {
     await connectToDB();
@@ -196,56 +241,11 @@ export async function fetchActivityForUser(userId: string) {
         "id" in reply.author &&
         String(reply.author.id) !== String(userId)
     );
-    return filteredReplies.map((reply) => {
-      // Defensive checks for populated author and parentId
-      const authorObj =
-        reply.author && typeof reply.author === "object" && "id" in reply.author
-          ? (reply.author as unknown as {
-              id?: string;
-              name?: string;
-              username?: string;
-              image?: string;
-            })
-          : null;
-      const parentObj =
-        reply.parentId &&
-        typeof reply.parentId === "object" &&
-        "text" in reply.parentId
-          ? (reply.parentId as unknown as {
-              text?: string;
-              parentId?: string | null;
-            })
-          : null;
-      // parentObj is the parent thread (the thing being replied to)
-      // If parentObj has a parentId, it's a comment; if not, it's a post
-      const isReplyToComment = parentObj && parentObj.parentId;
-      const message = isReplyToComment
-        ? `replied to your comment: "${
-            reply.text && typeof reply.text === "string"
-              ? reply.text.slice(0, 30)
-              : "..."
-          }"`
-        : `commented on your post: "${
-            reply.text && typeof reply.text === "string"
-              ? reply.text.slice(0, 30)
-              : "..."
-          }"`;
-      return {
-        id: reply._id.toString(),
-        type: "reply",
-        user: {
-          id: authorObj?.id || "",
-          name: authorObj?.name || "Unknown User",
-          username: authorObj?.username || "",
-          image: authorObj?.image || "/assets/profile.svg",
-        },
-        message,
-        time: reply.createdAt,
-      };
-    });
-  } catch (error) {
+
+    return filteredReplies;
+  } catch (error: any) {
     console.error("Error fetching activity:", error);
-    return [];
+    throw new Error(`Failed to fetch activity: ${error.message}`);
   }
 }
 

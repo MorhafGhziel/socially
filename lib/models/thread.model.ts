@@ -7,6 +7,7 @@ const threadSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   parentId: { type: mongoose.Schema.Types.ObjectId, ref: "Thread" },
   children: [{ type: mongoose.Schema.Types.ObjectId, ref: "Thread" }],
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 // Add method to convert to plain object

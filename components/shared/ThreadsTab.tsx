@@ -33,6 +33,7 @@ interface Thread {
     };
     createdAt: string;
   }[];
+  likes: string[];
 }
 
 interface Reply {
@@ -46,6 +47,7 @@ interface Reply {
   };
   parentId: string | null;
   createdAt: string;
+  likes: string[];
 }
 
 interface Props {
@@ -113,6 +115,7 @@ const ThreadsTab = async ({ currentUserId, accountId, accountType }: Props) => {
                       content: child.text,
                       createdAt: child.createdAt,
                     }))}
+                    likes={thread.likes}
                     isComment
                   />
                 </article>
@@ -143,6 +146,7 @@ const ThreadsTab = async ({ currentUserId, accountId, accountType }: Props) => {
                     community={null}
                     createdAt={reply.createdAt}
                     comments={[]}
+                    likes={reply.likes}
                     isComment
                   />
                 </article>

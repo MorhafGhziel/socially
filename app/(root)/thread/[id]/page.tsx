@@ -74,6 +74,7 @@ export default async function Page({ params, searchParams }: PageProps) {
                 createdAt: new Date(child.createdAt).toISOString(),
               })) || []
             }
+            likes={populatedThread.likes?.map((like: any) => like.id) || []}
           />
         </div>
 
@@ -108,6 +109,7 @@ export default async function Page({ params, searchParams }: PageProps) {
                     createdAt: new Date(child.createdAt).toISOString(),
                   })) || []
                 }
+                likes={childItem.likes?.map((like: any) => like.id) || []}
                 isComment
               />
             ))}

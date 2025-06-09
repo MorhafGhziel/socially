@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { deleteThread } from "@/lib/actions/thread.actions";
+import { deleteThread, toggleLike } from "@/lib/actions/thread.actions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +46,7 @@ interface Props {
     createdAt: string;
   }[];
   isComment?: boolean;
+  likes?: string[];
 }
 
 const ThreadCard = ({
@@ -58,9 +59,12 @@ const ThreadCard = ({
   createdAt,
   comments,
   isComment,
+  likes = [],
 }: Props) => {
   const [imageError, setImageError] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isLiked, setIsLiked] = useState(likes.includes(currentUserId));
+  const [likeCount, setLikeCount] = useState(likes.length);
   const pathname = usePathname();
   const router = useRouter();
   const isAuthor = currentUserId === author.id;
@@ -71,6 +75,16 @@ const ThreadCard = ({
       router.refresh();
     } catch (error) {
       console.error("Error deleting thread:", error);
+    }
+  };
+
+  const handleLike = async () => {
+    try {
+      const result = await toggleLike(id, currentUserId, pathname || "/");
+      setIsLiked(!isLiked);
+      setLikeCount(result.likes);
+    } catch (error) {
+      console.error("Error toggling like:", error);
     }
   };
 
@@ -148,13 +162,29 @@ const ThreadCard = ({
 
             <div className="mt-5 flex flex-col gap-3">
               <div className="flex gap-3.5">
-                <Image
-                  src="/assets/heart-gray.svg"
-                  alt="heart"
-                  width={24}
-                  height={24}
-                  className="cursor-pointer object-contain"
-                />
+                <button
+                  onClick={handleLike}
+                  className="flex items-center gap-1"
+                >
+                  <Image
+                    src={
+                      isLiked
+                        ? "/assets/heart-filled.svg"
+                        : "/assets/heart-gray.svg"
+                    }
+                    alt="heart"
+                    width={24}
+                    height={24}
+                    className={`cursor-pointer object-contain ${
+                      isLiked ? "filter-red" : ""
+                    }`}
+                  />
+                  {likeCount > 0 && (
+                    <span className="text-subtle-medium text-gray-1">
+                      {likeCount}
+                    </span>
+                  )}
+                </button>
                 <Link href={`/thread/${id}`}>
                   <Image
                     src="/assets/reply.svg"
